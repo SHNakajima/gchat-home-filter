@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Chat Filter 設定</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 350px;
+        min-height: 400px;
+        font-family: "Google Sans", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        overflow: hidden;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a73e8;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .filter-icon {
+        width: 24px;
+        height: 24px;
+        color: #4285f4;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: #5f6368;
+        font-weight: 400;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #202124;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .regex-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #dadce0;
+        border-radius: 12px;
+        font-size: 14px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .regex-input:focus {
+        outline: none;
+        border-color: #4285f4;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.1);
+      }
+
+      .save-button {
+        width: 100%;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+      }
+
+      .save-button:hover {
+        background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+        box-shadow: 0 6px 16px rgba(66, 133, 244, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .save-button:active {
+        transform: translateY(0);
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #5f6368;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(66, 133, 244, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #4285f4;
+      }
+
+      .examples {
+        margin-top: 16px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e8eaed;
+      }
+
+      .examples-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a73e8;
+        margin-bottom: 8px;
+      }
+
+      .example {
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 12px;
+        background: white;
+        padding: 6px 8px;
+        border-radius: 6px;
+        margin-bottom: 4px;
+        border: 1px solid #dadce0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .example:hover {
+        background: #e8f0fe;
+        border-color: #4285f4;
+      }
+
+      .status {
+        text-align: center;
+        padding: 8px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-size: 14px;
+        font-weight: 500;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .status.show {
+        opacity: 1;
+      }
+
+      .status.success {
+        background: rgba(52, 168, 83, 0.1);
+        color: #137333;
+        border: 1px solid rgba(52, 168, 83, 0.3);
+      }
+
+      .status.error {
+        background: rgba(234, 67, 53, 0.1);
+        color: #d93025;
+        border: 1px solid rgba(234, 67, 53, 0.3);
+      }
+
+      .regex-icon {
+        width: 16px;
+        height: 16px;
+        color: #4285f4;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .container {
+        animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 class="title">
+          <svg
+            class="filter-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+          </svg>
+          Chat Filter
+        </h1>
+        <p class="subtitle">メッセージフィルタリング設定</p>
+      </div>
+
+      <div class="form-group">
+        <label class="label" for="regexInput">
+          <svg
+            class="regex-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 7V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" />
+            <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" />
+            <path d="M3 12h18" />
+          </svg>
+          フィルタ正規表現
+        </label>
+        <textarea
+          id="regexInput"
+          class="regex-input"
+          placeholder="例: (スパム|広告|宣伝)"
+        ></textarea>
+        <div class="help-text">
+          この正規表現にマッチするメッセージが非表示になります。大文字・小文字は区別されません。
+        </div>
+      </div>
+
+      <button id="saveButton" class="save-button">設定を保存</button>
+
+      <div id="status" class="status"></div>
+
+      <div class="examples">
+        <div class="examples-title">正規表現の例</div>
+        <div class="example" data-regex="(スパム|広告|宣伝)">
+          特定のキーワード
+        </div>
+        <div class="example" data-regex="@everyone">メンション回避</div>
+        <div class="example" data-regex="^.*bot.*$">botメッセージ</div>
+        <div class="example" data-regex="https?://[^\s]+">
+          URL含むメッセージ
+        </div>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
